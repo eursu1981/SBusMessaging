@@ -1,0 +1,8 @@
+C:\!SBusMessaging\SBusMessaging\Core.Domain\bin\Debug\netstandard2.0\Core.Domain.deps.json
+C:\!SBusMessaging\SBusMessaging\Core.Domain\bin\Debug\netstandard2.0\Core.Domain.dll
+C:\!SBusMessaging\SBusMessaging\Core.Domain\bin\Debug\netstandard2.0\Core.Domain.pdb
+C:\!SBusMessaging\SBusMessaging\Core.Domain\obj\Debug\netstandard2.0\Core.Domain.AssemblyInfoInputs.cache
+C:\!SBusMessaging\SBusMessaging\Core.Domain\obj\Debug\netstandard2.0\Core.Domain.AssemblyInfo.cs
+C:\!SBusMessaging\SBusMessaging\Core.Domain\obj\Debug\netstandard2.0\Core.Domain.dll
+C:\!SBusMessaging\SBusMessaging\Core.Domain\obj\Debug\netstandard2.0\Core.Domain.pdb
+C:\!SBusMessaging\SBusMessaging\Core.Domain\obj\Debug\netstandard2.0\Core.Domain.csprojAssemblyReference.cache
