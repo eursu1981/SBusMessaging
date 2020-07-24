@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Core.Domain.Entities
 {
-    public partial class Products
+    public class Products
     {
         public Products()
         {
@@ -17,7 +17,6 @@ namespace Core.Domain.Entities
         public int CategoryId { get; set; }
         public short ModelYear { get; set; }
         public decimal ListPrice { get; set; }
-
         public virtual Brands Brand { get; set; }
         public virtual Categories Category { get; set; }
         public virtual ICollection<OrderItems> OrderItems { get; set; }
