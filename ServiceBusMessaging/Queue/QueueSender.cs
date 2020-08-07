@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ServiceBusMessaging
 {
-    class QueueSender<T> : IQueueSender<T> where T : class
+    public class QueueSender<T> : IQueueSender<T> where T : class
     {
         private QueueSettings settings;
         private QueueClient client;

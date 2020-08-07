@@ -1,15 +1,19 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
+using Core.Data;
 using Core.Domain;
 using Core.Domain.Entities;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Azure.ServiceBus;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using ServiceBusMessaging;
 
 namespace SBusMessaging
 {
@@ -17,7 +21,7 @@ namespace SBusMessaging
     {
         public static void Main(string[] args)
         {
-          //CreateHostBuilder(args).Build().Run();
+          CreateHostBuilder(args).Build().Run();
 
             var host = CreateHostBuilder(args).Build();
 
@@ -31,6 +35,7 @@ namespace SBusMessaging
                     // we can start with a clean slate
                     context.Database.EnsureDeleted();
                     context.Database.Migrate();
+                    
                 }
                 catch (Exception ex)
                 {

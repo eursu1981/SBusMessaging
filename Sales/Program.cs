@@ -2,13 +2,17 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Core.Data;
 using Core.Domain.Entities;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Azure.ServiceBus;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using ServiceBusMessaging;
+using ServiceBusMessaging.Utils;
 
 namespace Sales
 {
@@ -16,7 +20,7 @@ namespace Sales
     {
         public static void Main(string[] args)
         {
-            //CreateHostBuilder(args).Build().Run();
+            CreateHostBuilder(args).Build().Run();
 
             var host = CreateHostBuilder(args).Build();
 
@@ -37,6 +41,8 @@ namespace Sales
                     logger.LogError(ex, "An error occurred while migrating the database.");
                 }
             }
+
+
             // run the web app
             host.Run();
         }
@@ -47,5 +53,7 @@ namespace Sales
                 {
                     webBuilder.UseStartup<Startup>();
                 });
+
+      
     }
 }

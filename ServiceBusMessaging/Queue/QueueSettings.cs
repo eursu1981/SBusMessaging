@@ -6,14 +6,15 @@ namespace ServiceBusMessaging
     {
         public QueueSettings(string connectionString, string queueName)
         {
+
             if (string.IsNullOrEmpty(connectionString))
                 throw new ArgumentNullException("connectionString");
 
             if (string.IsNullOrEmpty(queueName))
                 throw new ArgumentNullException("queueName");
 
-            this.ConnectionString = connectionString;
-            this.QueueName = queueName;
+            ConnectionString = connectionString;
+            QueueName = queueName;
         }
 
         public string ConnectionString { get; }

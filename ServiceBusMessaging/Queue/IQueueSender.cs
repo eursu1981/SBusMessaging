@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace ServiceBusMessaging
 {
-    internal interface IQueueSender<T> where T : class
+    public interface IQueueSender<T> where T : class
     {
         Task SendAsync(T item, Dictionary<string, object> properties);
     }
