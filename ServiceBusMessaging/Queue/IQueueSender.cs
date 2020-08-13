@@ -5,6 +5,6 @@ namespace ServiceBusMessaging
 {
     public interface IQueueSender<T> where T : class
     {
-        Task SendAsync(T item, Dictionary<string, object> properties);
+        Task SendAsync(T item);
     }
 }

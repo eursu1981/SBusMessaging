@@ -1,4 +1,5 @@
-﻿using Core.Domain.Entities;
+﻿using Core.Data.Utils;
+using Core.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,6 +27,16 @@ namespace Sales.Models
             Quantity = entity.Quantity;
             ListPrice = entity.ListPrice;
             Discount = entity.Discount;
+        }
+        internal OrderItems ToEntity(OrderItems entity, int orderId)
+        {
+            entity.OrderId = orderId;
+            entity.ItemId = ItemId;
+            entity.ProductId = ProductId;
+            entity.Quantity = Quantity;
+            entity.ListPrice = ListPrice;
+            entity.Discount = Discount;
+            return entity;
         }
     }
 }

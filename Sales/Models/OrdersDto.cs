@@ -1,7 +1,9 @@
-﻿using Core.Domain.Entities;
+﻿using Core.Data.Utils;
+using Core.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Threading.Tasks;
 
 namespace Sales.Models
@@ -20,10 +22,10 @@ namespace Sales.Models
         public int StaffId { get; set; }
         public string StaffName { get; set; }
 
-       // public  Customers Customer { get; set; }
-       // public  Staffs Staff { get; set; }
-      //  public  Stores Store { get; set; }
-        public  List<OrderItemsDto> OrderItems { get; set; }
+        // public  Customers Customer { get; set; }
+        // public  Staffs Staff { get; set; }
+        //  public  Stores Store { get; set; }
+        public List<OrderItemsDto> OrderItems { get; set; }
 
         public OrdersDto()
         {
@@ -43,7 +45,26 @@ namespace Sales.Models
             CustomerName = entity.Customer?.FirstName + entity.Customer?.LastName;
             StaffName = entity.Staff?.FirstName + entity.Staff?.LastName;
             StoreName = entity.Store?.StoreName;
-            OrderItems.AddRange(entity.OrderItems?.Select(x => new OrderItemsDto(x)).ToList());
+            if (entity.OrderItems.Any())
+                OrderItems.AddRange(entity.OrderItems.Select(x => new OrderItemsDto(x)).ToList());
+        }
+
+        internal Orders ToEntity(Orders entity, ActionType action)
+        {
+            if (action == ActionType.Update)
+            {
+                entity.Customer = null;
+                entity.Staff = null;
+                entity.Store = null;
+            }
+            entity.CustomerId = CustomerId;
+            entity.OrderStatus = OrderStatus;
+            entity.OrderDate = OrderDate != DateTime.MinValue ? OrderDate : DateTime.Now;
+            entity.RequiredDate = RequiredDate != DateTime.MinValue ? RequiredDate : DateTime.Now.AddDays(5);
+            entity.ShippedDate = ShippedDate;
+            entity.StoreId = StoreId;
+            entity.StaffId = StaffId;
+            return entity;
         }
 
     }

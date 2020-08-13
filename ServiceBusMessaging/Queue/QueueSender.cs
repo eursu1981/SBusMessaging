@@ -1,7 +1,7 @@
-﻿using Microsoft.Azure.ServiceBus;
+﻿using Core.Data;
+using Microsoft.Azure.ServiceBus;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -9,35 +9,35 @@ namespace ServiceBusMessaging
 {
     public class QueueSender<T> : IQueueSender<T> where T : class
     {
-        private QueueSettings settings;
-        private QueueClient client;
+        private QueueSettings _settings;
+        private QueueClient _queueClient;
 
-        public QueueSender(QueueSettings settings)
+        public QueueSender()
         {
-            this.settings = settings;
-            Init();
+            var appSettings = AppSettingsJson.GetAppSettings();
+
+            _settings = new QueueSettings(
+                appSettings["SBusAzure:SBusConnectionString"],
+               appSettings["SBusAzure:SBusQueueName"]);
+
+            _queueClient = new QueueClient(
+                   _settings.ConnectionString, _settings.QueueName);
         }
 
-        public async Task SendAsync(T item, Dictionary<string, object> properties)
-        {
-            var json = JsonConvert.SerializeObject(item);
-            var message = new Message(Encoding.UTF8.GetBytes(json));
 
-            if (properties != null)
+        public async Task SendAsync(T item)
+        {
+            try
             {
-                foreach (var prop in properties)
-                {
-                    message.UserProperties.Add(prop.Key, prop.Value);
-                }
+                var json = JsonConvert.SerializeObject(item);
+                var message = new Message(Encoding.UTF8.GetBytes(json));
+
+                await _queueClient.SendAsync(message);
             }
-
-            await client.SendAsync(message);
-        }
-
-        private void Init()
-        {
-            client = new QueueClient(
-                     this.settings.ConnectionString, this.settings.QueueName);
+            finally
+            {
+                await _queueClient.CloseAsync();
+            }
         }
     }
 }

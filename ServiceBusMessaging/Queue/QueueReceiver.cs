@@ -1,75 +1,78 @@
-﻿using Microsoft.Azure.ServiceBus;
+﻿using Core.Data;
+using Microsoft.Azure.ServiceBus;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using ServiceBusMessaging.Utils;
 using System;
-using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ServiceBusMessaging
 {
     public class QueueReceiver<T> : IQueueReceiver<T> where T : class
     {
-        private QueueSettings settings;
-        private QueueClient client;
+        private QueueSettings _settings;
+        private readonly IProcess _processData;
+        private readonly ILogger _logger;
+        private QueueClient _queueClient;
 
-        public QueueReceiver(QueueSettings settings)
+        public QueueReceiver(IProcess processData, ILogger<QueueReceiver<T>> logger)
         {
-            this.settings = settings;
-            Init();
+            var appSettings = AppSettingsJson.GetAppSettings();
+
+            _settings = new QueueSettings(
+                appSettings["SBusAzure:SBusConnectionString"],
+               appSettings["SBusAzure:SBusQueueName"]);
+
+            _processData = processData;
+            _logger = logger;
+            _queueClient = new QueueClient(
+                   _settings.ConnectionString, _settings.QueueName);
         }
 
-        private void Init()
-        {
-            client = new QueueClient(
-                     this.settings.ConnectionString, this.settings.QueueName);
-        }
-
-        public void Receive(
-                Func<T, MessageResponseEnum> onProcess,
-                Action<Exception> onError,
-                Action onWait)
-        {
-            var options = new MessageHandlerOptions(e =>
+        public void ReceiveAndProcessMessages()
+        {            
+                var options = new MessageHandlerOptions(e =>
             {
-                onError(e.Exception);
+                _logger.LogError(e.Exception, "Message handler encountered an exception");
                 return Task.CompletedTask;
             })
-            {
-                AutoComplete = false,
-                MaxAutoRenewDuration = TimeSpan.FromMinutes(1)
-            };
-
-            client.RegisterMessageHandler(
-                async (message, token) =>
                 {
-                    try
-                    {
-                        // Get message
-                        var data = Encoding.UTF8.GetString(message.Body);
-                        T item = JsonConvert.DeserializeObject<T>(data);
+                    AutoComplete = false,
+                    MaxAutoRenewDuration = TimeSpan.FromMinutes(1)
+                };
 
-                        // Process message
-                        var result = onProcess(item);
-
-                        if (result == MessageResponseEnum.Complete)
-                            await client.CompleteAsync(message.SystemProperties.LockToken);
-                        else if (result == MessageResponseEnum.Abandon)
-                            await client.AbandonAsync(message.SystemProperties.LockToken);
-                        else if (result == MessageResponseEnum.Dead)
-                            await client.DeadLetterAsync(message.SystemProperties.LockToken);
-
-                        // Wait for next message
-                        onWait();
-                    }
-                    catch (Exception ex)
-                    {
-                        await client.DeadLetterAsync(message.SystemProperties.LockToken);
-                        onError(ex);
-                    }
-                }, options);
+                _queueClient.RegisterMessageHandler(ProcessMessageAsync, options);
         }
 
-    }
+        public async Task CloseQueueAsync()
+        {
+            await _queueClient.CloseAsync();
+        }
 
+        private async Task ProcessMessageAsync(Message message, CancellationToken token) 
+        {
+            try
+            {
+                T item = JsonConvert.DeserializeObject<T>(Encoding.UTF8.GetString(message.Body));
+                var result = _processData.Process(item);
+
+                if (result == MessageResponseEnum.Complete)
+                    await _queueClient.CompleteAsync(message.SystemProperties.LockToken);
+                else
+                if (result == MessageResponseEnum.Abandon)
+                    await _queueClient.AbandonAsync(message.SystemProperties.LockToken);
+                else
+                if (result == MessageResponseEnum.Dead)
+                    await _queueClient.DeadLetterAsync(message.SystemProperties.LockToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Message handler encountered an exception");
+                await _queueClient.DeadLetterAsync(message.SystemProperties.LockToken);
+
+            }
+        }
     }
+}

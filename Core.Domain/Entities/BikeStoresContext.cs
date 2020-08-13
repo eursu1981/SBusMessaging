@@ -4,7 +4,11 @@ namespace Core.Domain.Entities
 {
     public class BikeStoresContext : DbContext
     {
+        public BikeStoresContext() : base(GetOptions())
+        {
 
+        }
+       
         public BikeStoresContext(DbContextOptions<BikeStoresContext> options)
             : base(options)
         {
@@ -344,6 +348,12 @@ namespace Core.Domain.Entities
             });
 
             base.OnModelCreating(modelBuilder);
+        }
+        private static DbContextOptions GetOptions()
+        {
+            return new DbContextOptionsBuilder()
+                .UseSqlServer(@"Server=.\SQLExpress;Database=BikeStores;Trusted_Connection=True;")
+                .Options;
         }
 
     }

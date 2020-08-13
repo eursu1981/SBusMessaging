@@ -2,13 +2,13 @@ using Core.Data.Repository;
 using Core.Domain.Entities;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using ServiceBusMessaging;
 
 namespace Sales
 {
@@ -24,28 +24,19 @@ namespace Sales
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            //services.AddControllers().AddNewtonsoftJson(options =>
-            //{
-            //    options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-            //    options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
-            //});
+            services.AddControllers().AddNewtonsoftJson(options =>
+            {
+                options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+                options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+            });
             services.AddDbContext<BikeStoresContext>(options =>
             {
                 options.UseSqlServer(@"Server=.\SQLExpress;Database=BikeStores;Trusted_Connection=True;");
             });
             services.AddScoped(typeof(IRepositoryBase<>), typeof(RepositoryBase<>));
+            services.AddScoped(typeof(IQueueSender<>), typeof(QueueSender<>));
 
             services.AddCors();
-            services.AddMvc(options =>
-            {
-                options.EnableEndpointRouting = false;
-            })
-           .SetCompatibilityVersion(CompatibilityVersion.Version_3_0)
-           .AddNewtonsoftJson(options =>
-           {
-               options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-               options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
-           });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -63,20 +54,14 @@ namespace Sales
                .AllowAnyHeader());
 
            
-           // app.UseRouting();
+            app.UseRouting();
             app.UseAuthorization();
-            app.UseMvc(routes =>
+            app.UseEndpoints(endpoints =>
             {
-                routes.MapRoute(
-                    name: "default",
-                    template: "{controller}/{action=Index}/{id?}");
-            });
-            //app.UseEndpoints(endpoints =>
-            //{
-            //    endpoints.MapControllerRoute("default",
-            //                                     "{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapControllerRoute("default",
+                                                 "{controller=Home}/{action=Index}/{id?}");
 
-            //});
+            });
         }
       
     }

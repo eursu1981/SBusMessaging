@@ -1,13 +1,10 @@
-﻿using ServiceBusMessaging.Utils;
-using System;
+﻿using System.Threading.Tasks;
 
 namespace ServiceBusMessaging
 {
     public interface IQueueReceiver<T> where T : class
-    {
-        void Receive(
-                 Func<T, MessageResponseEnum> onProcess,
-                 Action<Exception> onError,
-                 Action onWait);
+    { 
+        void ReceiveAndProcessMessages();
+        Task CloseQueueAsync();
     }
 }
